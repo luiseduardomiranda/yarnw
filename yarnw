@@ -1,0 +1,49 @@
+#!/bin/bash
+
+INSTALL_PATH="./bin"
+YARN_DIST_BASE_URL="https://yarnpkg.com/downloads";
+NODE_DIST_BASE_URL="https://nodejs.org/dist";
+
+if [[ -z "$NODE_VERSION" ]]; then
+  NODE_VERSION="6.9.2";
+fi
+
+if [[ -z "$YARN_VERSION" ]]; then
+  YARN_VERSION="1.3.2";
+fi
+
+if [ ! -d "$INSTALL_PATH" ]; then
+  echo "Creating directory: $INSTALL_PATH"
+  mkdir -p "$INSTALL_PATH"
+fi
+
+cd $INSTALL_PATH
+INSTALL_PATH=`pwd`
+cd - > /dev/null
+
+MACHINE_TYPE=`uname -m`
+if [ ${MACHINE_TYPE} == 'x86_64' ]; then
+  MACHINE_ARCH="linux-x64"
+else
+  MACHINE_ARCH="linux-x86"
+fi
+
+NODE_VERSION_FOLDER="node-v$NODE_VERSION-$MACHINE_ARCH"
+NODE_FULL_PATH="$INSTALL_PATH/$NODE_VERSION_FOLDER"
+if [ ! -d "$NODE_FULL_PATH" ]; then
+  echo "Fetching Node $NODE_VERSION to $INSTALL_PATH/node.tar.gz";
+  wget -O $INSTALL_PATH/node.tar.gz $NODE_DIST_BASE_URL/v$NODE_VERSION/$NODE_VERSION_FOLDER.tar.gz
+  tar xzf $INSTALL_PATH/node.tar.gz -C $INSTALL_PATH/
+  rm $INSTALL_PATH/node.tar.gz
+fi
+
+YARN_VERSION_FOLDER="yarn-v$YARN_VERSION"
+YARN_FULL_PATH="$INSTALL_PATH/$YARN_VERSION_FOLDER"
+if [ ! -d "$YARN_FULL_PATH" ]; then
+  echo "Fetching Yarn $YARN_VERSION to $INSTALL_PATH/yarn.tar.gz";
+  wget -O $INSTALL_PATH/yarn.tar.gz $YARN_DIST_BASE_URL/$YARN_VERSION/$YARN_VERSION_FOLDER.tar.gz
+  tar xzf $INSTALL_PATH/yarn.tar.gz -C $INSTALL_PATH/
+  rm $INSTALL_PATH/yarn.tar.gz
+fi
+
+"$NODE_FULL_PATH"/bin/node "$YARN_FULL_PATH"/bin/yarn.js "$@"
